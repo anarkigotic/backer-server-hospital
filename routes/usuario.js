@@ -7,12 +7,20 @@ var middelwares = require('../middelwares/auth');
 
 
 app.get('/',middelwares.verificaToken, (req, res) => {
-    Usuario.find({}, 'nombre email img role').then(usuarios => {
-        res.status(200).json({
-            ok: true,
-            usuarios,
-            usuarioToken : req.usuario 
-        })
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+    Usuario.find({}, 'nombre email img role')
+    .skip(desde)
+    .limit(3)
+    .then(usuarios => {
+            Usuario.count({}).then(count=>{
+                res.status(200).json({
+                   ok: true,
+                   usuarios,
+                   total:count
+                   //usuarioToken : req.usuario 
+               })
+            })
     }).catch(err => {
         return res.status(500).json({
             ok: false,
